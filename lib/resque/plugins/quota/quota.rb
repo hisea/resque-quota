@@ -1,6 +1,7 @@
 module Resque
   module Plugins
-    class Quota
+    module Quota
+      VERSION = "0.0.1"
 
 
     end

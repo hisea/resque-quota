@@ -1,11 +1,10 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'resque/plugins/quota/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "resque-quota"
-  gem.version       = Resque::Plugins::Quota::VERSION
+  gem.version       = "0.0.1"
   gem.authors       = ["hisea"]
   gem.email         = ["zyinghai@gmail.com"]
   gem.description   = %q{A Resque plugin that limits the number jobs a worker can perform in a period of time.}
