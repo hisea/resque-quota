@@ -1,0 +1,2 @@
+require "resque-quota/version"
+
