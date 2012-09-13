@@ -1,0 +1,5 @@
+require "resque"
+require 'resque/tasks'
+
+require File.expand_path("quota_example")
+task "resque:setup"
