@@ -1,3 +1,5 @@
+require 'resque'
+
 module Resque
   module Plugins
     module Quota
@@ -10,6 +12,12 @@ module Resque
         end
         def decr_key_by(key,value)
           Resque.redis.decrby key,value
+        end
+        def expire_key(key,ttl)
+          Resque.redis.expire key,ttl
+        end
+        def exist_key?(key)
+          Resque.redis.exists key
         end
       end
     end
