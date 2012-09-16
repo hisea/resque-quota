@@ -1,5 +1,6 @@
 require "resque"
 require 'resque/tasks'
+require 'resque_scheduler/tasks'
 
 require File.expand_path("quota_example")
 task "resque:setup"

@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   gem.add_dependency 'resque', "~> 1.19"
+  gem.add_dependency 'resque-scheduler'
 end
