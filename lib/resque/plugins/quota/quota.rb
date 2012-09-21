@@ -15,14 +15,14 @@ module Resque
             "resque:quota:#{self.name}:#{method}"
           end
           define_method "#{method}=" do |value|
-            set_key self.send("#{method}_key"), value
+            self.set_key self.send("#{method}_key"), value
           end
 
           define_method "#{method}" do 
-            get_key self.send("#{method}_key")
+            self.get_key self.send("#{method}_key")
           end
           define_method "#{method}?" do
-            exist_key?("#{method}_key")
+            self.exist_key?(self.send "#{method}_key")
           end
         end
       
@@ -43,36 +43,38 @@ module Resque
 
 
         def worker_quota=(value)
-          is_new_key = !exist_key?(worker_quota_key)
-          set_key worker_quota_key,value
-          expire_key worker_quota_key,default_expiry if is_new_key
+          is_new_key = !self.exist_key?(self.worker_quota_key)
+          self.set_key self.worker_quota_key,value
+          self.expire_key self.worker_quota_key,self.default_expiry if is_new_key
         end
         def worker_quota
-          self.worker_quota= default_quota unless exist_key?(worker_quota_key)
-          get_key worker_quota_key
+          unless self.exist_key?(self.worker_quota_key)
+            self.worker_quota= self.default_quota          
+          end
+          self.get_key self.worker_quota_key
         end
 
         def decr_quota_by(value)
-          decr_key_by self.worker_quota_key,value
+          self.decr_key_by self.worker_quota_key,value
         end
         def worker_quota_key
           "#{Socket.gethostname}:#{Process.ppid}:#{self.name}"
         end
         
         def before_perform_quota_check(*args)
-          #raise "error"
-          puts args
-          if worker_quota.to_i <= 0
-            if requeue? && requeue == "true"
-              Resque.enqueue_in(requeue_in,self,*args)
+          puts "Before: #{worker_quota_key}: #{worker_quota}"        
+          puts "default expiry: #{self.default_expiry}"
+          if self.worker_quota.to_i <= 0
+            if self.requeue? && self.requeue == "true"
+              Resque.enqueue_in(self.requeue_in.to_i,self,*args)
             end
             raise Resque::Job::DontPerform 
           end
         end
       end
       def self.included(base)
-        base.send :extend, ClassMethods
-        base.send :include, InstanceMethods
+        base.extend ClassMethods
+        #base.send :include, InstanceMethods
       end
     end
   end

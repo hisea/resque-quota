@@ -17,4 +17,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.add_dependency 'resque', "~> 1.19"
   gem.add_dependency 'resque-scheduler'
+  gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'mock_redis'
+  gem.add_development_dependency 'resque_spec'
 end
