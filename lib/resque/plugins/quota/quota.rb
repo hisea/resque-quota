@@ -1,4 +1,4 @@
-require_relative "redis_helper"
+require 'resque'
 require 'resque_scheduler'
 require 'socket'
 module Resque
@@ -8,21 +8,21 @@ module Resque
       module InstanceMethods
       end
       module ClassMethods
-        include Resque::Plugins::Quota::RedisHelper
+        include Resque::Helpers
 
         [:default_expiry,:default_quota,:requeue,:requeue_in].each do |method|
           define_method "#{method}_key" do
             "resque:quota:#{self.name}:#{method}"
           end
           define_method "#{method}=" do |value|
-            self.set_key self.send("#{method}_key"), value
+            redis.set self.send("#{method}_key"), value
           end
 
           define_method "#{method}" do 
-            self.get_key self.send("#{method}_key")
+            redis.get self.send("#{method}_key")
           end
           define_method "#{method}?" do
-            self.exist_key?(self.send "#{method}_key")
+            redis.exists(self.send "#{method}_key")
           end
         end
       
@@ -43,19 +43,17 @@ module Resque
 
 
         def worker_quota=(value)
-          is_new_key = !self.exist_key?(self.worker_quota_key)
-          self.set_key self.worker_quota_key,value
-          self.expire_key self.worker_quota_key,self.default_expiry if is_new_key
+          is_new_key = !redis.exists(self.worker_quota_key)
+          redis.set self.worker_quota_key,value
+          redis.expire self.worker_quota_key,self.default_expiry if is_new_key
         end
         def worker_quota
-          unless self.exist_key?(self.worker_quota_key)
-            self.worker_quota= self.default_quota          
-          end
-          self.get_key self.worker_quota_key
+          self.worker_quota= self.default_quota unless redis.exists(self.worker_quota_key)
+          redis.get self.worker_quota_key
         end
 
         def decr_quota_by(value)
-          self.decr_key_by self.worker_quota_key,value
+          redis.decrby self.worker_quota_key,value
         end
         def worker_quota_key
           "#{Socket.gethostname}:#{Process.ppid}:#{self.name}"
@@ -63,9 +61,8 @@ module Resque
         
         def before_perform_quota_check(*args)
           puts "Before: #{worker_quota_key}: #{worker_quota}"        
-          puts "default expiry: #{self.default_expiry}"
           if self.worker_quota.to_i <= 0
-            if self.requeue? && self.requeue == "true"
+            if self.requeue? && self.requeue_in?
               Resque.enqueue_in(self.requeue_in.to_i,self,*args)
             end
             raise Resque::Job::DontPerform 

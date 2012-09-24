@@ -2,6 +2,6 @@ source 'https://rubygems.org'
 
 gem "rake"
 gem "resque"
-gem "resque-quota", :path => "/Users/hai/Code/github/resque-quota"
+gem "resque-quota", :path => "/Users/Yinghai/jugnoo/resque-quota"
 gem "pry"
 gem "pry-nav"
