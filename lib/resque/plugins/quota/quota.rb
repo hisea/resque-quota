@@ -60,7 +60,6 @@ module Resque
         end
         
         def before_perform_quota_check(*args)
-          puts "Before: #{worker_quota_key}: #{worker_quota}"        
           if self.worker_quota.to_i <= 0
             if self.requeue? && self.requeue_in?
               Resque.enqueue_in(self.requeue_in.to_i,self,*args)
